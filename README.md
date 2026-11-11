@@ -48,12 +48,24 @@ WebRAG transforms arbitrary webpages and multi-page documentation websites into 
 
 ## Screenshots
 
-### Grounded Answers
-![Grounded Answers](docs/assets/screenshots/grounded-answers.png)
-
-### Source Citations
-![Source Citations](docs/assets/screenshots/source-citations.png)
-
+<table>
+  <tr>
+    <td align="center">
+      <strong>Grounded Answers</strong>
+    </td>
+    <td align="center">
+      <strong>Source Citations</strong>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <img src="docs/assets/screenshots/grounded-answers.png" width="100%" />
+    </td>
+    <td>
+      <img src="docs/assets/screenshots/source-citations.png" width="100%" />
+    </td>
+  </tr>
+</table>
 ---
 
 
