@@ -17,7 +17,7 @@ export const App: React.FC = () => {
   const [health, setHealth] = useState<HealthResponse | null>(null);
   const [healthError, setHealthError] = useState<string | null>(null);
 
-  // Load backend health
+  // Load backend health status
   const refreshHealth = useCallback(async () => {
     try {
       const data = await checkHealth();
@@ -25,7 +25,7 @@ export const App: React.FC = () => {
       setHealthError(null);
     } catch (err: any) {
       setHealth(null);
-      setHealthError(err.message || 'Cannot connect to backend at 127.0.0.1:8000');
+      setHealthError(err.message || 'Cannot reach backend service at 127.0.0.1:8000');
     }
   }, []);
 
@@ -35,7 +35,7 @@ export const App: React.FC = () => {
     return () => clearInterval(interval);
   }, [refreshHealth]);
 
-  // Load scope details when scopeId changes
+  // Load scope metadata when scopeId updates
   const loadScopeDetails = useCallback(async (id: string) => {
     try {
       const details = await getScopeDetails(id);
@@ -48,11 +48,10 @@ export const App: React.FC = () => {
   const handleScopeIndexed = (newScopeId: string) => {
     setScopeId(newScopeId);
     loadScopeDetails(newScopeId);
-    // Add welcoming message
     const welcomeMsg: ChatMessage = {
       id: `sys_${Date.now()}`,
       role: 'assistant',
-      content: `✅ **Content indexed successfully!** Scope: \`${newScopeId}\`.\n\nYou can now ask questions about the indexed content.`,
+      content: `**Scope indexed:** \`${newScopeId}\`.\n\nYou can now ask specific questions or request a full summary.`,
       timestamp: new Date().toISOString(),
     };
     setMessages((prev) => [...prev, welcomeMsg]);
@@ -60,7 +59,7 @@ export const App: React.FC = () => {
 
   const handleClearIndex = async () => {
     if (!scopeId) return;
-    const confirmClear = window.confirm(`Clear indexed content for scope "${scopeId}"?`);
+    const confirmClear = window.confirm(`Clear active index scope "${scopeId}"?`);
     if (!confirmClear) return;
 
     try {
@@ -106,7 +105,7 @@ export const App: React.FC = () => {
       const errorMsg: ChatMessage = {
         id: `err_${Date.now()}`,
         role: 'assistant',
-        content: `❌ **Error querying WebRAG:** ${err.message}`,
+        content: `**Error:** Unable to query WebRAG backend: ${err.message}`,
         timestamp: new Date().toISOString(),
       };
       setMessages((prev) => [...prev, errorMsg]);
@@ -116,8 +115,8 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-slate-950 text-slate-100 overflow-hidden text-xs">
-      {/* Top Header */}
+    <div className="flex flex-col h-screen bg-canvas text-content-primary overflow-hidden text-xs font-sans">
+      {/* Sleek Top Header */}
       <Header
         health={health}
         healthError={healthError}
@@ -127,9 +126,9 @@ export const App: React.FC = () => {
         scopeId={scopeId}
       />
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col p-3 space-y-3 min-h-0 overflow-hidden">
-        {/* Scope Mode Selector */}
+      {/* Main Content Workspace */}
+      <div className="flex-1 flex flex-col p-2.5 space-y-2.5 min-h-0 overflow-hidden">
+        {/* Scope Mode Segmented Control */}
         <ScopeSelector mode={mode} onChangeMode={setMode} disabled={chatLoading} />
 
         {/* Indexing Action Panel */}
@@ -140,7 +139,7 @@ export const App: React.FC = () => {
           scopeDetails={scopeDetails}
         />
 
-        {/* RAG Chat View */}
+        {/* RAG Inquiry and Chat View */}
         <ChatView
           messages={messages}
           onSendMessage={handleSendMessage}

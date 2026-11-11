@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Loader2, CheckCircle2, AlertTriangle, Layers, ExternalLink } from 'lucide-react';
+import { Play, Loader2, CheckCircle2, AlertTriangle, Layers, Globe } from 'lucide-react';
 import { ScopeMode, CrawlJobStatus, ScopeDetails } from '../types';
 import { ingestPage, ingestSite, getCrawlStatus } from '../api/client';
 
@@ -101,20 +101,18 @@ export const IndexingPanel: React.FC<IndexingPanelProps> = ({
   const handleIndexPage = async () => {
     setIndexing(true);
     setErrorMessage(null);
-    setStatusMessage('Extracting active page content...');
+    setStatusMessage('Extracting page content...');
 
     try {
       let extractedData: any = null;
 
       if (typeof chrome !== 'undefined' && chrome.tabs && activeTab?.id) {
         try {
-          // Attempt direct message to content script
           const response = await chrome.tabs.sendMessage(activeTab.id, { type: 'EXTRACT_PAGE_CONTENT' });
           if (response && response.success) {
             extractedData = response.data;
           }
         } catch {
-          // If content script was not yet injected into tab, inject it on demand
           try {
             await chrome.scripting.executeScript({
               target: { tabId: activeTab.id },
@@ -135,7 +133,7 @@ export const IndexingPanel: React.FC<IndexingPanelProps> = ({
       const pageText = extractedData?.text || undefined;
       const pageHtml = extractedData?.html || undefined;
 
-      setStatusMessage('Sending to WebRAG backend...');
+      setStatusMessage('Ingesting to vector index...');
       const res = await ingestPage({
         url: pageUrl,
         title: pageTitle,
@@ -145,8 +143,8 @@ export const IndexingPanel: React.FC<IndexingPanelProps> = ({
 
       setStatusMessage(
         res.already_indexed
-          ? 'Page already indexed and unchanged.'
-          : `Indexed ${res.chunks_indexed} chunks successfully!`
+          ? 'Page unchanged; index up to date.'
+          : `Indexed ${res.chunks_indexed} chunks successfully.`
       );
       onScopeIndexed(res.scope_id);
     } catch (err: any) {
@@ -193,18 +191,18 @@ export const IndexingPanel: React.FC<IndexingPanelProps> = ({
   };
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-xl p-3.5 space-y-3 shadow-sm">
+    <div className="bg-canvas-subtle border border-edge rounded-panel p-3 space-y-2.5">
       {mode === 'page' ? (
-        <div className="space-y-2.5">
+        <div className="space-y-2">
           <div className="space-y-1">
-            <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">
-              Target Webpage
+            <span className="text-2xs font-mono uppercase tracking-wider text-content-muted block">
+              Active Document
             </span>
-            <div className="p-2 rounded-lg bg-slate-950/80 border border-slate-800/80 text-xs">
-              <p className="font-medium text-slate-200 truncate">
+            <div className="p-2 rounded-control bg-canvas border border-edge text-xs">
+              <p className="font-medium text-content-primary truncate">
                 {activeTab?.title || 'No active tab detected'}
               </p>
-              <p className="text-[11px] text-slate-500 truncate mt-0.5 font-mono">
+              <p className="text-2xs text-content-secondary truncate mt-0.5 font-mono">
                 {activeTab?.url || '—'}
               </p>
             </div>
@@ -214,11 +212,11 @@ export const IndexingPanel: React.FC<IndexingPanelProps> = ({
             type="button"
             disabled={indexing || !activeTab?.url}
             onClick={handleIndexPage}
-            className={`w-full py-2 px-3 rounded-lg text-xs font-medium flex items-center justify-center space-x-2 transition-all ${
+            className={`w-full py-1.5 px-3 rounded-control text-xs font-medium flex items-center justify-center space-x-1.5 transition-colors select-none ${
               indexing
-                ? 'bg-indigo-600/50 text-indigo-200 cursor-wait'
-                : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/20 active:scale-[0.99]'
-            } disabled:opacity-50 disabled:cursor-not-allowed`}
+                ? 'bg-teal/50 text-[#111315] cursor-wait'
+                : 'bg-teal hover:bg-teal-hover text-[#111315] active:bg-teal-hover cursor-pointer'
+            } disabled:opacity-40 disabled:cursor-not-allowed`}
           >
             {indexing ? (
               <>
@@ -227,17 +225,17 @@ export const IndexingPanel: React.FC<IndexingPanelProps> = ({
               </>
             ) : (
               <>
-                <Play className="w-3.5 h-3.5 fill-current" />
+                <Play className="w-3 h-3 fill-current" />
                 <span>Index Active Page</span>
               </>
             )}
           </button>
         </div>
       ) : (
-        <div className="space-y-2.5">
+        <div className="space-y-2">
           <div className="space-y-1">
-            <label className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">
-              Website URL
+            <label className="text-2xs font-mono uppercase tracking-wider text-content-muted block">
+              Target Origin
             </label>
             <input
               type="url"
@@ -245,13 +243,13 @@ export const IndexingPanel: React.FC<IndexingPanelProps> = ({
               onChange={(e) => setSiteUrl(e.target.value)}
               placeholder="https://example.com"
               disabled={indexing}
-              className="w-full px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-500"
+              className="w-full px-2.5 py-1.5 rounded-control bg-canvas border border-edge text-xs text-content-primary placeholder-content-muted focus:outline-none focus:border-teal transition-colors font-mono"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-2 text-xs">
             <div>
-              <label className="text-[10px] text-slate-400">Max Pages (1-50)</label>
+              <label className="text-2xs text-content-secondary block">Max Pages (1-50)</label>
               <input
                 type="number"
                 min={1}
@@ -259,11 +257,11 @@ export const IndexingPanel: React.FC<IndexingPanelProps> = ({
                 value={maxPages}
                 onChange={(e) => setMaxPages(parseInt(e.target.value) || 10)}
                 disabled={indexing}
-                className="w-full mt-0.5 px-2 py-1 rounded bg-slate-950 border border-slate-800 text-slate-200 text-xs focus:outline-none focus:border-indigo-500"
+                className="w-full mt-0.5 px-2 py-1 rounded-control bg-canvas border border-edge text-content-primary text-xs font-mono focus:outline-none focus:border-teal transition-colors"
               />
             </div>
             <div>
-              <label className="text-[10px] text-slate-400">Max Depth (1-5)</label>
+              <label className="text-2xs text-content-secondary block">Max Depth (1-5)</label>
               <input
                 type="number"
                 min={1}
@@ -271,7 +269,7 @@ export const IndexingPanel: React.FC<IndexingPanelProps> = ({
                 value={maxDepth}
                 onChange={(e) => setMaxDepth(parseInt(e.target.value) || 2)}
                 disabled={indexing}
-                className="w-full mt-0.5 px-2 py-1 rounded bg-slate-950 border border-slate-800 text-slate-200 text-xs focus:outline-none focus:border-indigo-500"
+                className="w-full mt-0.5 px-2 py-1 rounded-control bg-canvas border border-edge text-content-primary text-xs font-mono focus:outline-none focus:border-teal transition-colors"
               />
             </div>
           </div>
@@ -280,11 +278,11 @@ export const IndexingPanel: React.FC<IndexingPanelProps> = ({
             type="button"
             disabled={indexing || !siteUrl}
             onClick={handleIndexSite}
-            className={`w-full py-2 px-3 rounded-lg text-xs font-medium flex items-center justify-center space-x-2 transition-all ${
+            className={`w-full py-1.5 px-3 rounded-control text-xs font-medium flex items-center justify-center space-x-1.5 transition-colors select-none ${
               indexing
-                ? 'bg-indigo-600/50 text-indigo-200 cursor-wait'
-                : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/20 active:scale-[0.99]'
-            } disabled:opacity-50 disabled:cursor-not-allowed`}
+                ? 'bg-teal/50 text-[#111315] cursor-wait'
+                : 'bg-teal hover:bg-teal-hover text-[#111315] active:bg-teal-hover cursor-pointer'
+            } disabled:opacity-40 disabled:cursor-not-allowed`}
           >
             {indexing ? (
               <>
@@ -293,7 +291,7 @@ export const IndexingPanel: React.FC<IndexingPanelProps> = ({
               </>
             ) : (
               <>
-                <Play className="w-3.5 h-3.5 fill-current" />
+                <Play className="w-3 h-3 fill-current" />
                 <span>Crawl & Index Website</span>
               </>
             )}
@@ -303,52 +301,56 @@ export const IndexingPanel: React.FC<IndexingPanelProps> = ({
 
       {/* Crawl progress details */}
       {crawlStatus && crawlStatus.status === 'running' && (
-        <div className="bg-slate-950/90 border border-indigo-900/40 rounded-lg p-2.5 text-xs space-y-1.5 animate-pulse">
-          <div className="flex justify-between text-[11px] text-slate-400">
-            <span>Crawling Progress</span>
-            <span className="font-mono text-indigo-400">
-              {crawlStatus.pages_crawled}/{maxPages} pages
+        <div className="bg-canvas border border-edge rounded-control p-2 text-xs space-y-1.5">
+          <div className="flex justify-between text-2xs text-content-secondary">
+            <span>Crawl Progress</span>
+            <span className="font-mono text-teal">
+              {crawlStatus.pages_crawled} / {maxPages} pages
             </span>
           </div>
-          <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+          <div className="w-full bg-canvas-subtle h-1 rounded-full overflow-hidden border border-edge">
             <div
-              className="bg-indigo-500 h-full transition-all duration-300"
+              className="bg-teal h-full transition-all duration-300"
               style={{ width: `${Math.min(100, (crawlStatus.pages_crawled / maxPages) * 100)}%` }}
             />
           </div>
           {crawlStatus.current_url && (
-            <p className="text-[10px] text-slate-500 truncate font-mono">
-              Crawling: {crawlStatus.current_url}
+            <p className="text-2xs text-content-muted truncate font-mono">
+              {crawlStatus.current_url}
             </p>
           )}
         </div>
       )}
 
-      {/* Status or error badges */}
+      {/* Status or error feedback */}
       {statusMessage && (
-        <div className="flex items-center space-x-1.5 text-xs text-indigo-300 bg-indigo-950/30 border border-indigo-800/40 rounded-md p-2">
-          <CheckCircle2 className="w-3.5 h-3.5 text-indigo-400 flex-shrink-0" />
+        <div className="flex items-center space-x-1.5 text-2xs text-teal bg-teal-subtle border border-teal-border rounded-control p-2">
+          <CheckCircle2 className="w-3 h-3 text-teal flex-shrink-0" />
           <span className="truncate">{statusMessage}</span>
         </div>
       )}
 
       {errorMessage && (
-        <div className="flex items-center space-x-1.5 text-xs text-rose-300 bg-rose-950/40 border border-rose-800/50 rounded-md p-2">
-          <AlertTriangle className="w-3.5 h-3.5 text-rose-400 flex-shrink-0" />
+        <div className="flex items-center space-x-1.5 text-2xs text-coral bg-coral-subtle border border-coral-border rounded-control p-2">
+          <AlertTriangle className="w-3 h-3 text-coral flex-shrink-0" />
           <span className="truncate">{errorMessage}</span>
         </div>
       )}
 
-      {/* Scope summary badge */}
+      {/* Scope summary metadata */}
       {scopeDetails && (
-        <div className="flex items-center justify-between text-[11px] text-slate-400 bg-slate-950/50 border border-slate-800/60 rounded-md px-2.5 py-1.5">
+        <div className="flex items-center justify-between text-2xs text-content-secondary bg-canvas border border-edge rounded-control px-2.5 py-1.5">
           <div className="flex items-center space-x-1.5 truncate">
-            <Layers className="w-3.5 h-3.5 text-indigo-400" />
-            <span className="font-mono text-slate-300">{scopeDetails.page_count} page{scopeDetails.page_count === 1 ? '' : 's'}</span>
-            <span>•</span>
-            <span className="font-mono text-slate-300">{scopeDetails.chunk_count} chunks</span>
+            <Layers className="w-3 h-3 text-teal flex-shrink-0" />
+            <span className="font-mono text-content-primary">
+              {scopeDetails.page_count} {scopeDetails.page_count === 1 ? 'page' : 'pages'}
+            </span>
+            <span className="text-content-muted">•</span>
+            <span className="font-mono text-content-primary">
+              {scopeDetails.chunk_count} chunks
+            </span>
           </div>
-          <span className="text-[10px] text-slate-500 font-mono truncate max-w-[100px]">
+          <span className="text-2xs text-content-muted font-mono truncate max-w-[110px]" title={scopeDetails.scope_id}>
             {scopeDetails.scope_id}
           </span>
         </div>

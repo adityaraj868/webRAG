@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ExternalLink, ChevronDown, ChevronUp, Bookmark } from 'lucide-react';
+import { ExternalLink, ChevronDown, ChevronUp } from 'lucide-react';
 import { Citation } from '../types';
 
 interface CitationCardProps {
@@ -30,27 +30,27 @@ export const CitationCard: React.FC<CitationCardProps> = ({ citation, index }) =
   })();
 
   return (
-    <div className="text-xs bg-slate-900/90 border border-slate-800 rounded-lg overflow-hidden transition-all hover:border-slate-700">
+    <div className="text-xs bg-canvas-subtle border border-edge rounded-control overflow-hidden transition-colors hover:border-edge-strong">
       <div
         onClick={() => setExpanded(!expanded)}
-        className="p-2.5 flex items-start justify-between cursor-pointer hover:bg-slate-800/40"
+        className="p-2 flex items-start justify-between cursor-pointer select-none hover:bg-canvas-elevated"
       >
-        <div className="flex items-start space-x-2 flex-1 min-w-0 pr-2">
-          <span className="flex-shrink-0 w-4 h-4 rounded-full bg-indigo-500/20 text-indigo-400 font-mono text-[10px] flex items-center justify-center font-bold">
-            {index + 1}
+        <div className="flex items-start space-x-2 flex-1 min-w-0 pr-1.5">
+          <span className="flex-shrink-0 px-1 py-0.5 rounded-control bg-teal-subtle text-teal font-mono text-2xs font-medium">
+            [{index + 1}]
           </span>
           <div className="min-w-0 flex-1">
-            <h4 className="font-medium text-slate-200 truncate leading-snug">
-              {citation.page_title || 'Untitled Document'}
+            <h4 className="font-medium text-xs text-content-primary truncate leading-tight">
+              {citation.page_title || 'Untitled Reference'}
             </h4>
-            <div className="flex items-center space-x-1.5 text-[11px] text-slate-400 mt-0.5">
-              <span className="truncate max-w-[160px] text-slate-500">{domain}</span>
+            <div className="flex items-center space-x-1.5 text-2xs text-content-muted mt-0.5 font-mono">
+              <span className="truncate max-w-[140px] text-content-secondary">{domain}</span>
               <span>•</span>
-              <span className="text-slate-500 font-mono">Chunk {citation.chunk_index}</span>
+              <span>chk {citation.chunk_index}</span>
               {typeof citation.relevance_score === 'number' && (
                 <>
                   <span>•</span>
-                  <span className="text-emerald-400/90 font-mono">
+                  <span className="text-teal font-medium">
                     {(citation.relevance_score * 100).toFixed(0)}%
                   </span>
                 </>
@@ -59,35 +59,38 @@ export const CitationCard: React.FC<CitationCardProps> = ({ citation, index }) =
           </div>
         </div>
 
-        <div className="flex items-center space-x-1 flex-shrink-0">
+        <div className="flex items-center space-x-0.5 flex-shrink-0">
           <button
+            type="button"
             onClick={handleOpenSource}
-            title="Open in new tab"
-            className="p-1 rounded text-slate-400 hover:text-indigo-400 hover:bg-indigo-950/40 transition-colors"
+            title="Open original source"
+            className="p-1 rounded-control text-content-muted hover:text-teal hover:bg-canvas transition-colors"
           >
-            <ExternalLink className="w-3.5 h-3.5" />
+            <ExternalLink className="w-3 h-3" />
           </button>
           <button
             type="button"
-            className="p-1 rounded text-slate-400 hover:text-slate-200 transition-colors"
+            title={expanded ? 'Collapse excerpt' : 'Expand excerpt'}
+            className="p-1 rounded-control text-content-muted hover:text-content-primary transition-colors"
           >
-            {expanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+            {expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
           </button>
         </div>
       </div>
 
       {expanded && (
-        <div className="px-3 pb-3 pt-1 border-t border-slate-800/60 bg-slate-950/60 text-slate-300">
-          <p className="text-[11px] leading-relaxed italic border-l-2 border-indigo-500/50 pl-2 text-slate-300 font-sans whitespace-pre-wrap">
+        <div className="px-2.5 py-2 border-t border-edge bg-canvas text-content-secondary">
+          <p className="text-2xs leading-relaxed italic border-l-2 border-teal pl-2 font-sans whitespace-pre-wrap">
             "{citation.content_excerpt}"
           </p>
-          <div className="mt-2 flex justify-end">
+          <div className="mt-1.5 flex justify-end">
             <button
+              type="button"
               onClick={handleOpenSource}
-              className="text-[11px] text-indigo-400 hover:text-indigo-300 underline inline-flex items-center space-x-1"
+              className="text-2xs font-mono text-teal hover:underline inline-flex items-center space-x-1"
             >
-              <span>View full source</span>
-              <ExternalLink className="w-3 h-3" />
+              <span>source reference</span>
+              <ExternalLink className="w-2.5 h-2.5" />
             </button>
           </div>
         </div>

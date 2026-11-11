@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Loader2, Sparkles, MessageSquare } from 'lucide-react';
+import { ArrowUp, Loader2, Compass, CornerDownLeft } from 'lucide-react';
 import { ChatMessage } from '../types';
 import { MessageItem } from './MessageItem';
 
@@ -34,35 +34,35 @@ export const ChatView: React.FC<ChatViewProps> = ({
   };
 
   const samplePrompts = [
-    'What is the main topic of this page?',
-    'Summarize the key points in 3 bullets.',
-    'What tools or technologies are mentioned?',
+    'Summarize this page in 3 concise points',
+    'What are the core conclusions and arguments?',
+    'What key facts, data, or dates are mentioned?',
   ];
 
   return (
-    <div className="flex flex-col flex-1 min-h-0 bg-slate-950/40 rounded-xl border border-slate-800/80 overflow-hidden">
-      {/* Messages area */}
-      <div className="flex-1 overflow-y-auto p-3.5 space-y-4">
+    <div className="flex flex-col flex-1 min-h-0 bg-canvas-subtle rounded-panel border border-edge overflow-hidden">
+      {/* Scrollable Messages Area */}
+      <div className="flex-1 overflow-y-auto p-3 space-y-4">
         {messages.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center text-center p-4 space-y-3">
-            <div className="w-10 h-10 rounded-full bg-indigo-950/50 border border-indigo-800/40 flex items-center justify-center text-indigo-400">
-              <MessageSquare className="w-5 h-5" />
+          <div className="h-full flex flex-col items-center justify-center text-center p-4 space-y-3 select-none">
+            <div className="w-8 h-8 rounded-control bg-canvas-elevated border border-edge flex items-center justify-center text-teal">
+              <Compass className="w-4 h-4" />
             </div>
             <div className="space-y-1">
-              <h3 className="text-xs font-semibold text-slate-200">
-                {hasIndexedContent ? 'Ask Anything About This Content' : 'No Content Indexed Yet'}
+              <h3 className="text-xs font-semibold text-content-primary">
+                {hasIndexedContent ? 'Content Indexed & Ready' : 'No Active Index'}
               </h3>
-              <p className="text-[11px] text-slate-400 max-w-[240px]">
+              <p className="text-2xs text-content-secondary max-w-[240px] leading-relaxed">
                 {hasIndexedContent
-                  ? 'Ask natural-language questions grounded strictly in the indexed content with source citations.'
-                  : 'Index the current page or crawl a website above to start asking questions.'}
+                  ? 'Ask questions grounded strictly in the active index. Every answer includes citations.'
+                  : 'Index the active page or crawl a website domain above to begin inquiry.'}
               </p>
             </div>
 
             {hasIndexedContent && (
-              <div className="pt-2 w-full space-y-1.5">
-                <span className="text-[10px] text-slate-500 font-medium uppercase tracking-wider block">
-                  Suggested Questions
+              <div className="pt-2 w-full space-y-1 text-left">
+                <span className="text-2xs font-mono uppercase tracking-wider text-content-muted block px-1">
+                  Suggested Queries
                 </span>
                 {samplePrompts.map((prompt, idx) => (
                   <button
@@ -71,10 +71,10 @@ export const ChatView: React.FC<ChatViewProps> = ({
                     onClick={() => {
                       setInput(prompt);
                     }}
-                    className="w-full text-left p-2 rounded-lg bg-slate-900 border border-slate-800/80 hover:border-indigo-600/50 hover:bg-slate-850 text-xs text-slate-300 transition-colors flex items-center space-x-1.5"
+                    className="w-full text-left p-2 rounded-control bg-canvas border border-edge hover:border-edge-strong text-2xs text-content-secondary hover:text-content-primary transition-colors flex items-center justify-between group"
                   >
-                    <Sparkles className="w-3 h-3 text-indigo-400 flex-shrink-0" />
-                    <span className="truncate">{prompt}</span>
+                    <span className="truncate pr-2">{prompt}</span>
+                    <CornerDownLeft className="w-2.5 h-2.5 text-content-muted opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
                   </button>
                 ))}
               </div>
@@ -85,31 +85,31 @@ export const ChatView: React.FC<ChatViewProps> = ({
         )}
 
         {loading && (
-          <div className="flex items-center space-x-2 text-xs text-indigo-300 bg-indigo-950/20 border border-indigo-900/30 rounded-lg p-2.5 w-fit">
-            <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-400" />
-            <span>Retrieving context and generating grounded answer...</span>
+          <div className="flex items-center space-x-2 text-2xs text-teal bg-teal-subtle border border-teal-border rounded-control p-2 w-fit">
+            <Loader2 className="w-3 h-3 animate-spin text-teal" />
+            <span className="font-mono">Retrieving grounded context & synthesizing answer...</span>
           </div>
         )}
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input box */}
-      <form onSubmit={handleSubmit} className="p-2.5 bg-slate-900 border-t border-slate-800 flex items-center space-x-2">
+      {/* Pinned Input Composer */}
+      <form onSubmit={handleSubmit} className="p-2 bg-canvas border-t border-edge flex items-center space-x-1.5">
         <input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder={hasIndexedContent ? 'Ask a question about the indexed content...' : 'Index content above first...'}
+          placeholder={hasIndexedContent ? 'Ask a question about the active document...' : 'Index document or site above first...'}
           disabled={!hasIndexedContent || loading}
-          className="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-1 bg-canvas-subtle border border-edge rounded-control px-2.5 py-1.5 text-xs text-content-primary placeholder-content-muted focus:outline-none focus:border-teal transition-colors disabled:opacity-40 disabled:cursor-not-allowed font-sans"
         />
         <button
           type="submit"
           disabled={!input.trim() || !hasIndexedContent || loading}
-          className="p-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white disabled:opacity-40 disabled:cursor-not-allowed shadow-sm transition-colors"
-          title="Send question"
+          className="p-1.5 rounded-control bg-teal hover:bg-teal-hover text-[#111315] disabled:opacity-30 disabled:cursor-not-allowed transition-colors flex-shrink-0 cursor-pointer"
+          title="Send query"
         >
-          <Send className="w-3.5 h-3.5" />
+          <ArrowUp className="w-3.5 h-3.5 stroke-[2.5]" />
         </button>
       </form>
     </div>

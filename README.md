@@ -48,26 +48,13 @@ WebRAG transforms arbitrary webpages and multi-page documentation websites into 
 
 ## Screenshots
 
-<!-- Note: Add screenshots of the extension side panel and chat view below -->
-```
-+-------------------------------------------------------------------+
-|  [ WebRAG Side Panel ]                                            |
-|  Active Scope: scope_page_fastapi_tutorial (1 page, 12 chunks)    |
-|  ---------------------------------------------------------------  |
-|  [ Index Current Page ]   [ Crawl Website ]                       |
-|  ---------------------------------------------------------------  |
-|  User: How do query parameters work in FastAPI?                  |
-|                                                                   |
-|  WebRAG: In FastAPI, query parameters are declared by defining   |
-|  function parameters that are not part of path parameters...      |
-|                                                                   |
-|  Sources:                                                         |
-|  [1] Query Parameters - FastAPI (Chunk 2, Score: 0.892)           |
-|      "When you declare other function parameters that..."         |
-+-------------------------------------------------------------------+
-```
+### Grounded Answers
+![Grounded Answers](assets/screenshots/grounded-answers.png)
 
+### Source Citations
+![Source Citations](assets/screenshots/source-citations.png)
 ---
+
 
 ## Architecture
 
